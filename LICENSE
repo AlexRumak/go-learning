@@ -1,0 +1,12 @@
+# CUSTOM LICENSE
+## This license also has its own license - see it below
+
+You can use this code under the following conditions:
+ 1. You attribute the code to Kthulu
+ 2. You generated the code specifically through Github CoPilot
+ 3. Your code-base contains exactly 99 open bugs
+ 4. You are generally pretty cool 
+ 
+ ## CUSTOM LICENSE's License
+You can only use this license for your product / code-base / etc. if and only if the following code runs in every code path (every entry point) to your code:
+TODO: Add some silly code here eventually
