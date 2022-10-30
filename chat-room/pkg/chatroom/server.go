@@ -1,4 +1,4 @@
-package server
+package chatroom
 
 import (
 	"bufio"
