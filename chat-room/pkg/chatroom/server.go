@@ -1,8 +1,8 @@
 package chatroom
 
 import (
-	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"os"
 )
@@ -13,50 +13,42 @@ const (
 	SERVER_TYPE = "tcp"
 )
 
-func run_server() {
-	connection, err := net.Dial(SERVER_TYPE, SERVER_HOST+":"+SERVER_PORT)
+func main() {
+	fmt.Println("Server Running...")
+	server, err := net.Listen(SERVER_TYPE, SERVER_HOST+":"+SERVER_PORT)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error listening:", err.Error())
+		os.Exit(1)
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
-
-	for true {
-		fmt.Println("What message do you want to send? (type exit to exit)")
-
-		var message string
-		if scanner.Scan() {
-			message = scanner.Text()
+	defer server.Close()
+	fmt.Println("Listening on  " + SERVER_HOST + ":" + SERVER_PORT)
+	fmt.Println("Waiting on client...")
+	for {
+		connection, err := server.Accept()
+		
+			fmt.Println("Error accepting: ", err.Error())if err != nil {
+			os.Exit(1)
 		}
-
-		if scanner.Err() != nil {
-			fmt.Println("error reading input...")
-			continue
-		}
-
-		if message == "exit" {
-			break
-		}
-		writeMessage(connection, message)
-		readResponse(connection)
-	}
-
-	connection.Close()
-}
-
-func writeMessage(connection net.Conn, message string) {
-	fmt.Println("Attempting to send message:", message)
-	_, err := connection.Write([]byte(message))
-	if err != nil {
-		fmt.Println("Failed to send message:", err.Error())
+		fmt.Println("client connected")
+		go processClient(connection)
 	}
 }
 
-func readResponse(connection net.Conn) {
+func processClient(connection net.Conn) {
 	buffer := make([]byte, 1024)
-	mLen, err := connection.Read(buffer)
-	if err != nil {
-		fmt.Println("Error reading:", err.Error())
+	defer connection.Close()
+	for {
+		mLen, err := connection.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println("Client closed connection")
+				break
+			} else {
+				fmt.Println("Error reading:", err.Error())
+			}
+		}
+		fmt.Println("Received: ", string(buffer[:mLen]))
+		_, err = connection.Write([]byte("Thanks! Got your message:" + string(buffer[:mLen])))
 	}
-	fmt.Println("Received: ", string(buffer[:mLen]))
 }
